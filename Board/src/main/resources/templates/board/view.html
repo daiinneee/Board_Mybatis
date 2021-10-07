@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="board/layout/basic">
+	<th:block layout:fragment="title">
+		<title>this is view page</title>
+	</th:block>
+	
+	<th:block layout:fragment="modal">
+		<div id="commentModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+		    <div class="modal-dialog" role="document">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		                <span aria-hidden="true">&times;</span>
+		                </button>
+		            </div>
+		            <div class="modal-body">
+		                <form>
+		                    <div class="form-group">
+		                        <label for="modalWriter" class="col-form-label">작성자</label>
+		                        <input type="text" id="modalWriter" class="form-control" placeholder="작성자를 입력해 주세요." />
+		                    </div>
+		                    <div class="form-group">
+		                        <label for="modalContent" class="col-form-label">내용</label>
+		                        <textarea id="modalContent" class="form-control" placeholder="내용을 입력해 주세요."></textarea>
+		                    </div>
+		                </form>
+		            </div>
+		            <div class="modal-footer">
+		                <button type="button" id="btnModalCancel" class="btn btn-default waves-effect waves-light" data-dismiss="modal">취소하기</button>
+		                <button type="button" id="btnCommentUpdate" class="btn btn-primary waves-effect waves-light" onclick="updateComment()">수정하기</button>
+		                <button type="button" id="btnCommentDelete" class="btn btn-danger waves-effect waves-light">삭제하기</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	</th:block>
+
+	<!-- 게시글 상세 페이지의 실제 Content가 들어감 -->
+	<th:block layout:fragment="content">
+		<div class="card-content">
+			<form class="form-horizontal form-view" th:object="${board}">
+				<div class="form-group">
+					<label for="inp-type-1" class="col-sm-2 control-label">제목</label>
+					<div class="col-sm-10">
+						<p class="form-control" th:text="*{title}"></p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="inp-type-2" class="col-sm-2 control-label">이름</label>
+					<div class="col-sm-10">
+						<p class="form-control" th:text="*{writer}"></p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="inp-type-5" class="col-sm-2 control-label">내용</label>
+					<div class="col-sm-10">
+						<p class="form-control" th:text="*{content}"></p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="inp-type-5" class="col-sm-2 control-label">등록일</label>
+					<div class="col-sm-10">
+						<p class="form-control" th:text="*{#temporals.format( insertTime, 'yyyy-MM-dd' )}"></p>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="inp-type-5" class="col-sm-2 control-label">조회 수</label>
+					<div class="col-sm-10">
+						<p class="form-control" th:text="*{viewCnt}"></p>
+					</div>
+				</div>
+				
+				<!-- th:if문의 조건을 통해 컨트롤러에서 전달한 fileList가 비어있지 않은 경우에만 해당 영역을 출력 -->
+				<div th:if="${not #lists.isEmpty( fileList )}" class="form-group">
+					<label for="inp-type-4" class="col-sm-2 control-label">File</label>
+					<div class="col-sm-10">
+						<div class="form-control file_list">
+							<!-- th:each를 이용해서 등록된 파일 목록을 보여줌 -->
+							<!-- 아래 URI를 통해 파일 다운로드를 처리, 파라미터로 파일 번호(PK)를 전달 -->
+							<a th:each="row, status : ${fileList}" th:href="@{/board/download.do( idx=${row.idx} )}">
+								<i class="fa fa-file-o" aria-hidden="true"></i>
+								<!-- [[ ${row.originalName} ]] : fileList에 담긴 각각의 파일명을 의미 -->
+								<!-- [[ ${data} ]] 문법을 이용하면 태그 바깥에서 데이터를 처리할 수 있음 -->
+								[[ ${row.originalName} ]]
+							</a>
+						</div>
+					</div>
+				</div>
+			</form>
+
+			<div class="btn_wrap text-center" th:object="${params}">
+				<!-- 뒤로가기(파라미터 필요 X) : 게시글 리스트 페이지로 이동 -->
+				<a th:href="|@{/board/list.do}*{makeQueryString(currentPageNo)}|" class="btn btn-default waves-effect waves-light">뒤로가기</a>
+				<!-- 수정하기(게시글 번호(idx)) : 게시글 작성 페이지로 이동 -->
+				<a th:href="|@{/board/write.do}*{makeQueryString(currentPageNo)}&idx=${board.idx}|" class="btn btn-primary waves-effect waves-light">수정하기</a>
+				<!-- 삭제하기(게시글 번호(idx)) : 게시글 삭제 URI를 호출  -->
+				<button type="button" class="btn btn-danger waves-effect waves-light" th:onclick="deleteBoard([[ ${board.idx} ]], [[ *{makeQueryString(currentPageNo)} ]])">삭제하기</button>
+			</div>
+			</div>
+		</div>
+		<!-- /.card-content -->
+	</th:block>
+
+	<!-- 특정 댓글이 출력되는 영역 -->
+	<th:block layout:fragment="add-content">
+		<div class="box-content">
+			<div class="card-content">
+				<div class="clearfix">
+					<h4 class="box-title pull-left">Comment</h4>
+					<!-- /.box-title -->
+				</div>
+
+				<form class="form-horizontal form-view">
+					<div class="input-group margin-bottom-20">
+						<input type="text" id="content" class="form-control" />
+						<div class="input-group-btn">
+							<button type="button" class="btn waves-effect waves-light" th:onclick="insertComment([[ ${board.idx} ]])">
+							<i class="fa fa-commenting" aria-hidden="true"></i>
+							</button>
+						</div>
+					</div>
+					<ul class="notice-list"></ul>
+				</form>
+			</div>
+			<!-- /.card-content -->
+		</div>
+		<!-- /.box-content -->
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<!-- <script> 태그에 th:inline 속성을 javascript로 선언해야만 자바스크립트를 사용할 수 있음 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			
+			// 삭제버튼 클릭
+			function deleteBoard(idx, queryString) {
+				
+				// confirm : 자바스크립트의 Alert창과 유사 / 선택 함수를 사용해서 다시 한번 게시글의 삭제 여부를 확인
+				if (confirm(idx + "번 게시글을 삭제할까요?")) {
+					var uri = /*[[ @{/board/delete.do} ]]*/ null;
+					var html = "";
+					
+					html += '<form name="dataForm" action="'+uri+'" method="post">';
+					html += '<input type="hidden" name="idx" value="'+idx+'" />';
+
+					/*[- 쿼리 스트링을 오브젝트 형태로 변환 -]*/
+					// new URLSearchParams 함수 : 쿼리 스트링에 포함된 모든 파라미터들을 객체화하는 데 사용
+					// 각각의 파라미터가 자바의 Map 타입과 같이 Key, Value 형태로 저장됨
+					// 여기서는 객체화된 queryString에 포하모딘 파라미터들을 순환해서 값이 비어있지 않은 파라미터만 hidden 타입으로 폼에 추가함
+					// 예를 들어, 검색 유형이나 검색 키워드는 파라미터에 포함되지 않을 수도 있음
+					queryString = new URLSearchParams(queryString);
+					queryString.forEach(function(value, key) {
+						if (isEmpty(value) == false) {
+							html += '<input type="hidden" name="' + key + '" value="' + value + '" />';
+						}
+					});
+					
+					html += '</form>';
+					
+					// HTML의 <body> 태그 안에 html 변수에 담긴 폼을 추가
+					// 게시글 번호(idx)와 이전 페이지 정보(queryString)를 포함한 dataForm을 HTML의 body에 추가해서 서브밋
+					$("body").append(html);
+					// <body>에 추가된 폼을 찾아 컨트롤러로 서브밋
+					document.dataForm.submit();
+					
+				}
+			
+			}
+			
+			function openModal(idx, writer, content) {
+
+				// 모달 오픈
+				$("#commentModal").modal("toggle");
+
+				// 파라미터로 전달받은 댓글 작성자를 모달의 작성자 영역에 지정
+				document.getElementById("modalWriter").value = writer;
+				// 파라미터로 전달받은 댓글 내용을 모달의 내용 영역에 지정
+				document.getElementById("modalContent").value = content;
+				// 모달을 오픈하는 동시에 수정하기 버튼의 onclick 이벤트로 updateComment 함수를 지정, 함수의 인자로는 댓글의 번호를 전달
+				document.getElementById("btnCommentUpdate").setAttribute("onclick", "updateComment("+ idx +")");
+				// 모달을 오픈하는 동시에 삭제하기 버튼의 onclick 이벤트로 deletComment 함수를 지정, 함수의 인자로는 댓글의 번호를 전달
+				document.getElementById("btnCommentDelete").setAttribute("onclick", "deleteComment("+ idx +")");
+			}
+			
+			function insertComment(boardIdx) {
+
+				// content : 댓글 입력창, 비어있는 상태에서 등록 버튼을 클릭하면 setAttribute 함수를 사용해서
+				//           해당 <input> 태그에 placeholder 속성을 지정
+				var content = document.getElementById("content");
+				if (isEmpty(content.value) == true) {
+					content.setAttribute("placeholder", "댓글을 입력해 주세요.");
+					content.focus();
+					return false;
+				}
+
+				// CommentController의 registerComment 메소드와 매핑된 "/comments" URI를 의미
+				var uri = /*[[ @{/comments} ]]*/ null;
+				// Content-Type : 댓글 처리는 REST 방식을 사용하며, 자원을 JSON 문자열로 전송하기 때문에 application/json으로 지정
+				// 게시글 등록, 삭제와 같이 폼 태그를 이용해서 데이터를 전송하는 경우에는 x-www-form-urlencoded 또는 multipart/form-data로 전송
+				
+				// REST 방식의 HTTP 요청 메서드 중 PUT, PATCH, DELETE 방식은 브라우저에 따라 지원하지 않는 경우가 있음
+				// 웬만해서는 GET, POST 방식만을 지원하기 떄문에 브라우저에서는 POST 방식으로 데이터를 전송하고
+				// 해당 속성을 헤더에 지정해서 REST 방식의 HTTP 요청 메소드를 전송
+				var headers = {"Content-Type": "application/json", "X-HTTP-Method-Override": "POST"};
+				// insertComment의 파라미터로 전달받은 게시글 번호, content에 입력한 댓글 내용, 임의로 지정한 댓글 작성자를 해당 변수에 JSON으로 저장
+				var params = {"boardIdx": boardIdx, "content": content.value, "writer": "관리자"};
+
+				$.ajax({
+					// 호출할 URI를 지정
+					url: uri,
+					// HTTP 요청 메소드를 지정
+					type: "POST",
+					// HTTP 요청 헤더를 지정
+					headers: headers,
+					// 서버로부터 응답받을 데이터의 타입을 지정(text, html, xml, json, script 등)
+					dataType: "json",
+					// 서버에 전송할 데이터를 지정
+					// JSON 문자열로 데이터를 전송하기 위해 JSON.stringfy 함수를 사용해서 JSON 객체를 JSON 문자열로 변환
+					data: JSON.stringify(params),
+					// Ajax 요청에 성공했을 때 실행되는 콜백 함수
+					// 댓글이 정상적으로 등록되면, 새 댓글을 포함한 댓글을 출력하는 printCommentList 함수를 실행
+					success: function(response) {
+						if (response.result == false) {
+							alert("댓글 등록에 실패하였습니다.");
+							return false;
+						}
+
+						printCommentList();
+						content.value = "";
+					},
+					// Ajax 요청에 실패했을 때 실행되는 콜백 함수
+					error: function(xhr, status, error) {
+						alert("에러가 발생하였습니다.");
+						return false;
+					}
+				});
+			}
+			
+			function updateComment(idx) {
+	
+				// 모달의 댓글 작성자를 의미
+				var writer = document.getElementById("modalWriter");
+				// 모달의 댓글 내용을 의미
+				var content = document.getElementById("modalContent");
+				// CommentController의 registerComment 메서드와 두 번째로 매핑된 URI인 "/comments/{idx}"를 의미
+				var uri = /*[[ @{/comments/} ]]*/ + idx;
+				// insertComment 함수의 headers와 동일
+				var headers = {"Content-Type": "application/json", "X-HTTP-Method-Override": "PATCH"};
+				// insertComment 함수와 달리, 댓글의 수정은 댓글 테이블의 PK인 댓글 번호(idx)를 포함
+				var params = {"idx": idx, "writer": writer.value, "content": content.value};
+
+				// insertComment 함수와 마찬가지로 댓글 수정이 정상적으로 실행되면 
+				// 댓글을 다시 화면에 렌더링 하고, 모달을 클로즈
+				$.ajax({
+					url: uri,
+					type: "PATCH",
+					headers: headers,
+					dataType: "json",
+					data: JSON.stringify(params),
+					success: function(response) {
+						if (response.result == false) {
+							alert("댓글 수정에 실패하였습니다.");
+							return false;
+						}
+
+						printCommentList();
+						$("#commentModal").modal("hide");
+					},
+					error: function(xhr, status, error) {
+						alert("에러가 발생하였습니다.");
+						return false;
+					}
+				});
+			}
+			
+			function deleteComment(idx) {
+				// confrim(선택) 함수를 이용해서 다시 한번 댓글의 삭제 여부를 확인
+				if (!confirm('댓글을 삭제하시겠어요?')) {
+					return false; // '취소'를 클릭하면 함수가 종료, '확인'을 클릭하면 Ajax 요청이 실행
+				}
+				
+				// uri와 headers에 컨트롤러의 deleteComment 메소드의 매핑 URI와 HTTP 요청 헤더를 저장
+				var uri = /*[[ @{/comments/} ]]*/ + idx;
+				var headers = {"Content-Type": "application/json", "X-HTTP-Method-Override": "DELETE"};
+
+				$.ajax({
+					url: uri,
+					type: "DELETE",
+					headers: headers,
+					dataType: "json",
+					success: function(response) {
+						if (response.result == false) {
+							alert("댓글 삭제에 실패하였습니다.");
+							return false;
+						}
+
+						printCommentList();
+						$("#commentModal").modal("hide");
+					},
+					error: function(xhr, status, error) {
+						alert("에러가 발생하였습니다.");
+						return false;
+					}
+				});
+			}
+			
+			// jQuery ready(onload) 함수
+			// 게시글 상세 페이지의 로딩과 동시에 특정 게시글에 등록된 댓글을 출력하는 printCommentList 함수를 호출
+			$(function() {
+				printCommentList();
+			});
+
+			function printCommentList() {
+
+				// CommentController의 getCommentList 메서드의 매핑 URI를 해당 변수에 지정
+				var uri = /*[[ @{/comments/} + ${board.idx} ]]*/ null;
+
+				// $.get() : 기존의 Ajax 방식보다 좀 더 간편하게 GET 방식의 요청을 처리할 수 있는 함수
+				//			 인자로 URI, 파라미터, 콜백 함수, 데이터 타입을 지정할 수 있으며 함수의 끝에는 서버에서 리턴하는 데이터의 타입을 지정할 수 있음
+				$.get(uri, function(response) {
+					if (isEmpty(response) == false) {
+						var commentsHtml = ""; // 앞에서 제거한 <li> 태그를 대신해서 <ul> 태그에 댓글을 렌더링 할 HTML을 담는 용도의 변수
+
+						// $.each() : 댓글의 개수만큼 반복문을 실행해서 commentsHtml에 추가
+						$(response.commentList).each(function(idx, comment) {
+							// 아래의 기호는 따옴표(')가 아닌 백틱(`)기호
+							// 해당 기호를 사용하면 여러 개의 플러스(+)와 따옴표(')를 사용하지 않아도 복잡한 형태의 문자열을 만들 수 있음
+							// 백틱 기호 사이에서는 ${} 표현식을 사용해서 자바스크립트의 변수나 함수를 사용할 수 있음
+							// moment().format() : Moment.js 라이브러리에서 제공해주는 날짜 형태의 데이터 포맷에 사용되는 함수
+							commentsHtml += `
+								<li>
+									<span class="name">${comment.writer}</span>
+									<span class="desc">${comment.content}</span>
+									<span class="time">${moment(comment.insertTime).format('YYYY-MM-DD HH:mm:ss')}</span>
+									<button type="button" onclick="openModal(${comment.idx}, '${comment.writer}', '${comment.content}' )" class="btn btn-xs btn-circle"><i class="glyphicon glyphicon-pencil" aria-hidden="true"></i></button>
+								</li>
+							`;
+						});
+						
+						// html 함수 : commentsHtml에 담긴 댓글 리스트(<li> 태그)를 notice-list 클래스가 지정된 <ul> 태그에 렌더링
+						$(".notice-list").html(commentsHtml);
+					}
+				}, "json");
+			}
+			/*[- end of function -]*/
+
+			/*]]>*/
+		</script>
+	</th:block>
+</html>

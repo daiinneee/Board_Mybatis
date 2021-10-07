@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="board/layout/basic">
+	<th:block layout:fragment="title">
+		<title>This page is a list page</title>
+	</th:block>
+
+	<th:block layout:fragment="search">
+		<div th:replace="board/fragments/common :: search"></div>
+	</th:block>
+
+	<th:block layout:fragment="content"> <!-- 리스트 페이지의 실제 Content가 들어가는 영역 -->
+		<div class="table-responsive clearfix">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>제목</th>
+						<th>작성자</th>
+						<th>등록일</th>
+						<th>조회 수</th>
+					</tr>
+				</thead>
+				<tbody> <!-- 게시글 리스트 데이터가 출력되는 영역 -->
+					<tr th:if="${not #lists.isEmpty( boardList )}" th:each="row : ${boardList}">
+						<!-- #strings.equals 함수를 사용해서 공지 여부가 'Y'로 등록된 게시글이라면
+						     "공지"를 출력, 'N'으로 등록된 게시글이라면 게시글 번호를 출력 -->
+						<td scope="row" th:text="${#strings.equals( row.noticeYn, 'Y' ) ? '공지' : row.idx}"></td>
+						<td class="text-left">
+							<a th:href="|@{/board/view.do}${params.makeQueryString(params.currentPageNo)}&idx=${row.idx}|" th:text="${row.title}"></a>
+						</td>
+						<td th:text="${row.writer}"></td>
+						<!-- temporals.format 함수를 사용해 원하는 날짜 형태로 포맷 -->
+						<td th:text="${#temporals.format( row.insertTime, 'yyyy-MM-dd' )}"></td>
+						<td th:text="${row.viewCnt}"></td>
+					</tr>
+					<tr th:unless="${not #lists.isEmpty( boardList )}"> <!-- th:unless : else문과 비슷 -->
+						<td colspan="5">조회된 결과가 없습니다.</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div class="btn_wrap text-right">
+				<!-- Write 버튼 : "/board/write.do" URI를 호출해서 신규 글 작성 페이지로 이동 -->
+				<a th:href="@{/board/write.do}" class="btn btn-primary waves-effect waves-light">Write</a>
+			</div>
+
+			<!-- 리스트에서 특정 페이지로 이동할 수 있는 페이징 영역 -->
+			<th:block layout:fragment="paging">
+				<nav th:replace="board/fragments/common :: pagination"></nav>
+			</th:block>
+		</div>
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+
+			function movePage(uri, queryString) {
+				location.href = uri + queryString;
+			}
+			
+			// 메인 검색과 드롭다운 검색을 처리하는 함수
+			function searchBoard(form) {
+				/*[- 드롭다운이 아닌 메인 검색 키워드로 검색했을 때 -]*/
+				// 검색 영역에서 인클루드 한 common.html의 search 프래그먼트에서 searchForm 안의 searchkeyword의 값에
+				// 메인에 입력한 키워드를 저장한 다음 컨트롤러 폼 데이터를 전송
+				if (isEmpty(form) == true) {
+					var searchKeyword = document.getElementById("mainSearchKeyword");
+					if (isEmpty(searchKeyword.value) == true) {
+						alert("키워드를 입력해 주세요.");
+						searchKeyword.focus();
+						return false;
+					}
+
+					form = document.getElementById("searchForm");
+					form.searchKeyword.value = searchKeyword.value;
+					form.submit();
+				}
+				
+				/*[- 드롭다운을 통해 검색했을 때 -]*/
+				// 드롭다운 안에서의 검색은 이미 폼 태그로 감싸져 있으며
+				// 버튼의 타입이 submit으로 지정되어있기 때문에 별 다른 처리 없이 컨트롤러로 폼 데이터를 전송
+				if (isEmpty(form.searchKeyword.value) == true) {
+					alert("키워드를 입력해 주세요.");
+					form.searchKeyword.focus();
+					return false;
+				}
+			}
+			/*[- end of function -]*/
+
+			/*]]>*/
+		</script>
+	</th:block>
+</html>
