@@ -92,4 +92,9 @@
 			delete_yn = 'N'
 		<include refid="CommonMapper.search" />
 	</select>
+	
+	<update id="cntPlus" parameterType="Long">
+		UPDATE tb_board SET view_cnt = view_cnt + 1 WHERE idx = #{idx}
+	</update>
+	
 </mapper>

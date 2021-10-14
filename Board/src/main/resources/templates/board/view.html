@@ -36,6 +36,7 @@
 	</th:block>
 
 	<!-- 게시글 상세 페이지의 실제 Content가 들어감 -->
+	<!-- th:object 속성을 사용해서 *{} 표현식으로 제목, 이름, 내용, 등록일, 조회 수를 텍스트 형식을 출력  -->
 	<th:block layout:fragment="content">
 		<div class="card-content">
 			<form class="form-horizontal form-view" th:object="${board}">

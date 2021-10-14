@@ -142,5 +142,10 @@ public class BoardServiceImpl implements BoardService {
 	public AttachDTO getAttachDetail(Long idx) {
 		return attachMapper.selectAttachDetail(idx);
 	}
+	
+	@Override
+	public boolean cntPlus(Long idx) {
+		return boardMapper.cntPlus(idx);
+	}
 
 }

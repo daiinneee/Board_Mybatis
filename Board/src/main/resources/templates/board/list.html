@@ -21,6 +21,9 @@
 					</tr>
 				</thead>
 				<tbody> <!-- 게시글 리스트 데이터가 출력되는 영역 -->
+					<!-- #lists.isEmpty() 함수 : empty 여부 확인 -->
+					<!-- isEmpty 함수는 데이터가 비어있으면 true를 리턴 -->
+					<!-- th:each는 자바의 forEach와 유사한 기능, 여기서는 "row"라는 이름으로 boardList를 순환해서 데이터를 출력 -->
 					<tr th:if="${not #lists.isEmpty( boardList )}" th:each="row : ${boardList}">
 						<!-- #strings.equals 함수를 사용해서 공지 여부가 'Y'로 등록된 게시글이라면
 						     "공지"를 출력, 'N'으로 등록된 게시글이라면 게시글 번호를 출력 -->
@@ -30,9 +33,11 @@
 						</td>
 						<td th:text="${row.writer}"></td>
 						<!-- temporals.format 함수를 사용해 원하는 날짜 형태로 포맷 -->
+						<!-- 해당 <td> 태그는 게시글 등록일을 연-월-일 형태의 텍스트 형식으로 출력 -->
 						<td th:text="${#temporals.format( row.insertTime, 'yyyy-MM-dd' )}"></td>
 						<td th:text="${row.viewCnt}"></td>
 					</tr>
+					<!-- 일반적인 else문과 달리, th:if에 들어가는 조건곽 동일한 조건을 지정해야 함 -->
 					<tr th:unless="${not #lists.isEmpty( boardList )}"> <!-- th:unless : else문과 비슷 -->
 						<td colspan="5">조회된 결과가 없습니다.</td>
 					</tr>

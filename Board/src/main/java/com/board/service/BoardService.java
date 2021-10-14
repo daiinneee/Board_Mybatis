@@ -25,5 +25,7 @@ public interface BoardService {
 	
 	// 파일의 상세 정보를 조회하는 메소드
 	public AttachDTO getAttachDetail(Long idx);
+	
+	public boolean cntPlus(Long idx);
 
 }

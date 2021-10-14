@@ -69,6 +69,7 @@ public class BoardController extends UiUtils {
 		return showMessageWithRedirect("게시글 등록이 완료되었습니다.", "/board/list.do", Method.GET, pagingParams, model);
 	}
 
+	// Model : 컨트롤러에서 화면(View)으로 데이터를 전달하는 데 사용되는 인터페이스
 	@GetMapping(value = "/board/list.do")
 	public String openBoardList(@ModelAttribute("params") BoardDTO params, Model model) {
 		List<BoardDTO> boardList = boardService.getBoardList(params);
@@ -90,6 +91,8 @@ public class BoardController extends UiUtils {
 			return showMessageWithRedirect("없는 게시글이거나 이미 삭제된 게시글입니다.", "/board/list.do", Method.GET, null, model);
 		}
 		model.addAttribute("board", board);
+		
+		boardService.cntPlus(idx);
 
 		// fileList : 특정 게시글에 등록된 파일 목록을 조회하는 getAttachFileList 메소드의 실행 결과를 뷰로 전달
 		List<AttachDTO> fileList = boardService.getAttachFileList(idx); // 추가된 로직
