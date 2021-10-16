@@ -2,6 +2,9 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 	<head th:replace="board/fragments/header :: main-head"></head>
 	<body>
+		<!-- 컨트롤러에서 전달받은 네 개의 파라미터 중 params가 비어있지 않으면 
+		     Map에 담겨있는 데이터의 개수만큼 hidden 타입의 <input>태그를 추가
+		     action 속성에는 리다이렉트 할 URI를 지정, method 속성에는 HTTP 요청 메소드를 지정 -->
 		<form th:if="${not #maps.isEmpty( params )}" name="dataForm" th:action="${redirectUri}" th:method="${method}" style="display: none;">
 			<input th:each="key, status : ${params.keySet()}" type="hidden" th:name="${key}" th:value="${params.get(key)}" />
 		</form>
@@ -19,11 +22,17 @@
 						alert(message);
 					}
 
+					// parmas가 비어있지 않으면 폼을 컨트롤러로 서브밋
+					// ex. 3페이지에 있는 글을 수정했다면 게시글 등록이 완료되었다는 메시지를 보여주고,
+					//     다시 3페이지로 돌아가야 함
+					//     그러기 위해서는 params에 페이지 정보가 포함되어야 함
 					var params = /*[[ ${params} ]]*/ null;
 					if (isEmpty(params) == false) {
+						// <body>의 폼을 찾아 컨트롤러로 서브밋
 						document.dataForm.submit();
 					} else {
 						var redirectUri = /*[[ ${redirectUri} ]]*/ null;
+						// 단순히 페이지만 이동
 						location.href = redirectUri;
 					}
 				}

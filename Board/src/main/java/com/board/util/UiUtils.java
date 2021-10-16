@@ -21,7 +21,8 @@ public class UiUtils {
 
 		// message : 사용자에게 전달할 메시지를 의미
 		model.addAttribute("message", message); 
-		/* redirectUri : 리다이렉트 할 URI를 의미
+		/* 
+		 * redirectUri : 리다이렉트 할 URI를 의미
 		 * 시나리오
 		 * 1. 게시글 작성
 		 * 2. "게시글 등록이 완료되었습니다." 메시지를 사용자에게 전달
@@ -30,7 +31,8 @@ public class UiUtils {
 		model.addAttribute("redirectUri", redirectUri); 
 		// 앞에서 추가한 Method Enum 클래스에 선언한 HTTP 요청 메소드
 		model.addAttribute("method", method); 
-		/* 화면(View)으로 전달할 파라미터
+		/* 
+		 * 화면(View)으로 전달할 파라미터
 		 * 파라미터 개수는 어떤 페이지인지에 따라 달라질 수 있으므로
 		 * 여러 가지 데이터를 Key, Value 형태로 담을 수 있는 Map을 사용
 		 * 예를 들어, 페이징 처리가 되어있다고 가정해 보도록 하겠다.
@@ -39,6 +41,9 @@ public class UiUtils {
 		 * 이때, 이전 페이지의 정보를 params에 담아 리다이렉트 하면 3페이지로 돌아갈 수 있음
 		 */
 		model.addAttribute("params", params); 
+		
+		// params :: {currentPageNo=1, recordsPerPage=10, pageSize=10, searchType=null, searchKeyword=null}
+		System.out.println("params :: " + params);
 
 		return "utils/message-redirect";
 	}

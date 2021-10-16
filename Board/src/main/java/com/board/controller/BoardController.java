@@ -48,6 +48,8 @@ public class BoardController extends UiUtils {
 			model.addAttribute("fileList", fileList);
 		}
 
+		System.out.println("controller params :: " + params.toString());
+		
 		return "board/write";
 	}
 

@@ -37,6 +37,5 @@ public class BoardDTO extends CommonDTO{
 	/** 파일 인덱스 리스트 */
 	// 파일의 추가, 삭제, 변경이 일어났을 때 기존에 등록되어 있던, 즉 상태가 변하지 않은 파일의 번호(PK)를 의미
 	private List<Long> fileIdxs;
-
-
+	
 }

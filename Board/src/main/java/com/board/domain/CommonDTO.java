@@ -29,5 +29,4 @@ public class CommonDTO extends Criteria{
 	/** 삭제일 */
 	private LocalDateTime deleteTime;
 
-
 }
