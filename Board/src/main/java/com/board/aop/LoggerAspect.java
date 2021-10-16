@@ -47,7 +47,11 @@ public class LoggerAspect {
 		} else if (name.contains("Mapper") == true) {
 			type = "Mapper ===> ";
 		}
+		
+		// ex. name :: com.board.controller.BoardController
+		System.out.println("name :: " + name);
 
+		// ex. joinPoint.getSignature().getName() : openBoardList
 		logger.debug(type + name + "." + joinPoint.getSignature().getName() + "()");
 		return joinPoint.proceed();
 	}

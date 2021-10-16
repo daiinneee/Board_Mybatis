@@ -2,6 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 	<head th:replace="board/fragments/header :: main-head"></head>
 	<body>
+		<!-- params 
+		     ex. {currentPageNo=1, recordsPerPage=10, pageSize=10, searchType=null, searchKeyword=null} -->
 		<!-- 컨트롤러에서 전달받은 네 개의 파라미터 중 params가 비어있지 않으면 
 		     Map에 담겨있는 데이터의 개수만큼 hidden 타입의 <input>태그를 추가
 		     action 속성에는 리다이렉트 할 URI를 지정, method 속성에는 HTTP 요청 메소드를 지정 -->
