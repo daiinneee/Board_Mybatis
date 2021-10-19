@@ -32,6 +32,13 @@ public class LoggerAspect {
 	 *       파라미터가 0개 이상인 메소드를 의미
 	 *       
 	 */
+	
+	/*
+	 * 전체 로직
+	 * 메소드에 대한 정보를 가지고 있는 Signature 객체에 담겨 있는
+	 * 파일명을 포함한 전체 패키지 경로를 name에 담아
+	 * 어떤 클래스의 어떤 메소드를 호출하는지를 로그에 출력
+	 */
 	@Around("execution(* com.board..controller.*Controller.*(..)) or execution(* com.board..service.*Impl.*(..)) or execution(* com.board..mapper.*Mapper.*(..))")
 	public Object printLog(ProceedingJoinPoint joinPoint) throws Throwable {
 
