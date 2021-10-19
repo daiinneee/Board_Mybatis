@@ -47,7 +47,11 @@ public class PaginationInfo {
 	//     만약 currentPageNo이 21~25 사이라면 false가 됨
 	private boolean hasNextPage;
 
-	// 생성자
+	/*
+	 * 생성자
+	 * 잘못된 값이 들어왔을 때, 각각의 if 조건을 통해 기본값을 지정
+	 * 없는 페이지를 보여준다거나, 너무 많은 데이터 또는 페이지를 출력하는 것은 문제!
+	 */
 	public PaginationInfo(Criteria criteria) {
 		if (criteria.getCurrentPageNo() < 1) {
 			criteria.setCurrentPageNo(1);
@@ -59,11 +63,15 @@ public class PaginationInfo {
 			criteria.setPageSize(10);
 		}
 
+		// 코드의 마지막
+		// 여기서는 사용자의 요청 파라미터 정보를 가진 criteria를 PaginationInfo 클래스의 criteria에 저장 
+		// -> 그래야만 페이지 번호를 계산할 수 있음
 		this.criteria = criteria;
 	}
 
 	// setTotalRecordCoount 메소드 : 파라미터로 넘어온 전체 데이터 개수를 
-	// PaginationInfo 클래스의 전체 데이터 개수에 저장함, 전체 데이터 개수가 1개 이상이면 페이지 번호를 계산하는 calculation 메소드를 실
+	// PaginationInfo 클래스의 전체 데이터 개수에 저장함
+	// 전체 데이터 개수가 1개 이상이면 페이지 번호를 계산하는 calculation 메소드를 실행
 	public void setTotalRecordCount(int totalRecordCount) {
 		this.totalRecordCount = totalRecordCount;
 
