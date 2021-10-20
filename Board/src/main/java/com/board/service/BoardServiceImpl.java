@@ -113,12 +113,26 @@ public class BoardServiceImpl implements BoardService {
 		List<BoardDTO> boardList = Collections.emptyList();
 
 		int boardTotalCount = boardMapper.selectBoardTotalCount(params);
+		// params :: Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]
+		System.out.println("params :: " + params);
 
+		// PaginationInfo 클래스의 객체를 생성
 		PaginationInfo paginationInfo = new PaginationInfo(params);
+		System.out.println("paginationInfo 1 :: " + paginationInfo);
+		
+		// setTotalRecordCount 메소드에 전체 게시글 수를 담아 페이징 정보를 계산
 		paginationInfo.setTotalRecordCount(boardTotalCount);
+		
+		// paginationInfo :: PaginationInfo [criteria=Criteria [currentPageNo=1, recordsPerPage=10, 
+		//                   pageSize=10, searchKeyword=null, searchType=null], totalRecordCount=8199, 
+		//                   totalPageCount=820, firstPage=1, lastPage=10, firstRecordIndex=0, lastRecordIndex=10, 
+		//                   hasPreviousPage=false, hasNextPage=true]
+		System.out.println("paginationInfo 2 :: " + paginationInfo);
 
+		// 계산된 페이징 정보를 가진 pagenationInfo를 params에 담아 SELECT 한 다음,
+		// 게시글 리스트를 반환
 		params.setPaginationInfo(paginationInfo);
-
+		
 		if (boardTotalCount > 0) {
 			boardList = boardMapper.selectBoardList(params);
 		}

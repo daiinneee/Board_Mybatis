@@ -31,6 +31,7 @@ public class PaginationInfo {
 	/** SQL의 조건절에 사용되는 첫 RNUM */
 	// LIMIT 구문의 첫번째 값에 사용되는 변수
 	private int firstRecordIndex;
+	
 
 	/** SQL의 조건절에 사용되는 마지막 RNUM */
 	// 오라클과 같이 LIMIT 구문이 존재하지 않고, 인라인뷰를 사용해야 하는 데이터베이스에서 사용 / 현재 MySQL 사용하기 때문에 사용 X
@@ -92,6 +93,12 @@ public class PaginationInfo {
 		firstPage = ((criteria.getCurrentPageNo() - 1) / criteria.getPageSize()) * criteria.getPageSize() + 1;
 
 		/* 페이지 리스트의 마지막 페이지 번호 (마지막 페이지가 전체 페이지 수보다 크면 마지막 페이지에 전체 페이지 수를 저장) */
+		/*
+		 * 만약, 전체 페이지 개수는 35, 마지막 페이지 번호는 40, 현재 페이지 번호는 33이라면
+		 * lastPage는 당연히 전체 페이지 개수인 35가 되어야 함
+		 * 만약 if 조건이 없다면, 35페이지를 초과하는 36~40페이지는 
+		 * 데이터가 없는 무의미한 페이지가 됨
+		 */
 		lastPage = firstPage + criteria.getPageSize() - 1;
 		if (lastPage > totalPageCount) {
 			lastPage = totalPageCount;
@@ -109,5 +116,15 @@ public class PaginationInfo {
 		/* 다음 페이지 존재 여부 */
 		hasNextPage = (lastPage * criteria.getRecordsPerPage()) < totalRecordCount;
 	}
+
+	@Override
+	public String toString() {
+		return "PaginationInfo [criteria=" + criteria + ", totalRecordCount=" + totalRecordCount + ", totalPageCount="
+				+ totalPageCount + ", firstPage=" + firstPage + ", lastPage=" + lastPage + ", firstRecordIndex="
+				+ firstRecordIndex + ", lastRecordIndex=" + lastRecordIndex + ", hasPreviousPage=" + hasPreviousPage
+				+ ", hasNextPage=" + hasNextPage + "]";
+	}
+	
+	
 
 }

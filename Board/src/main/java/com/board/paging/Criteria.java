@@ -55,4 +55,12 @@ public class Criteria {
 		return uriComponents.toUriString();
 	}
 
+	@Override
+	public String toString() {
+		return "Criteria [currentPageNo=" + currentPageNo + ", recordsPerPage=" + recordsPerPage + ", pageSize="
+				+ pageSize + ", searchKeyword=" + searchKeyword + ", searchType=" + searchType + "]";
+	}
+	
+	
+
 }

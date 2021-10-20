@@ -93,6 +93,8 @@
 				</div>
 			</form>
 
+			<!-- th:object 속성을 사용하면 *{} 표현식을 사용해서
+				 메소드명과 변수명 만으로 컨트롤러에서 전달받은 객체에 접근할 수 있음 -->
 			<div class="btn_wrap text-center" th:object="${params}">
 				<!-- 뒤로가기(파라미터 필요 X) : 게시글 리스트 페이지로 이동 -->
 				<a th:href="|@{/board/list.do}*{makeQueryString(currentPageNo)}|" class="btn btn-default waves-effect waves-light">뒤로가기</a>
