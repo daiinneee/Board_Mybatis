@@ -19,6 +19,7 @@ public class CommentServiceImpl implements CommentService {
 	public boolean registerComment(CommentDTO params) {
 		int queryResult = 0;
 
+		// 댓글 번호(idx)가 파라미터에 포함되어 있지 않으면 INSERT 실행
 		if (params.getIdx() == null) {
 			queryResult = commentMapper.insertComment(params);
 		} else {
@@ -34,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
 
 		CommentDTO comment = commentMapper.selectCommentDetail(idx);
 
+		// 댓글의 상세 정보를 조회해서 정상적으로 사용 중인 댓글인 경우에만 삭제를 진행
 		if (comment != null && "N".equals(comment.getDeleteYn())) {
 			queryResult = commentMapper.deleteComment(idx);
 		}
