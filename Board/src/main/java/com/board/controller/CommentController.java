@@ -80,12 +80,39 @@ public class CommentController {
 	@GetMapping(value = "/comments/{boardIdx}")
 	public JsonObject getCommentList(@PathVariable("boardIdx") Long boardIdx, @ModelAttribute("params") CommentDTO params) {
 
+		// 1. JSON 객체를 생성
 		JsonObject jsonObj = new JsonObject();
 
+		// 2. getCommentList 메소드를 호출한 결과, 즉 댓글 목록을 commentList에 저장
 		List<CommentDTO> commentList = commentService.getCommentList(params);
+		
+		// 3. 등록된 댓글이 1개 이상이면, Gson 라이브러리에서 제공해주는 Gson 클래스의 메소드를 사용해서
+		//    commentList에 담긴 댓글을 JsonArray 타입으로 반환하고,
+		//    JSON 객체에 "commentList"라는 프로퍼티를 추가해서 리턴
 		if (CollectionUtils.isEmpty(commentList) == false) {
 			Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new GsonLocalDateTimeAdapter()).create();
 			JsonArray jsonArr = gson.toJsonTree(commentList).getAsJsonArray();
+			
+			/*
+			 * { 
+			 *   "commentList" : 
+			 *     0: {
+			 *         "idx" : 20,
+			 *         "boardIdx" : 6529,
+			 *         "content" : "20번 댓글을 추가합니다!",
+			 *         "writer" : "20번 회원",
+			 *         "deleteYn" : "N",
+			 *         "insertTime" : "2021-11-10T10:42:31",
+			 *         "currentPageNo" : 1,
+			 *         "recordsPerPage" : 10,
+			 *         "pageSize" : 10
+			 *     }
+			 *     1: {
+			 *        "idx" : 19,
+			 *         ...
+			 *     }
+			 * }
+			 */
 			jsonObj.add("commentList", jsonArr);
 		}
 
