@@ -47,20 +47,14 @@ public class CommentController {
 	*/
 	@RequestMapping(value = { "/comments", "/comments/{idx}" }, method = { RequestMethod.POST, RequestMethod.PATCH })
 	public JsonObject registerComment(@PathVariable(value = "idx", required = false) Long idx, @RequestBody final CommentDTO params) {
+		
+		// registerComment의 params :: Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]
+		System.out.println("registerComment의 params :: " + params);
 
 		// 첫번째로 결과를 저장할 JSON 객체를 생성
 		JsonObject jsonObj = new JsonObject();
 
 		try {
-			/*
-			if (idx != null) {
-				// params에 idx를 저장
-				// idx가 null이 아니라는 것은 댓글 번호, 즉 PK가 포함되어 있다는 것이며 PK가 포함되어 있다는 것은 
-				// 이미 생성되어 있는 댓글임을 의미 즉, idx를  파라미터로 전달받으면 댓글의 수정을 의미
-				params.setIdx(idx);
-			}
-			*/
-
 			// boolean 타입의 변수인 isResgisterd에는 CommentService의 registerComment 메소드를 실행한 결과를 저장
 			boolean isRegistered = commentService.registerComment(params);
 			// 댓글의 생성 또는 수정이 실행되면 true를, 실행되지 않으면 false를 저장
@@ -74,11 +68,16 @@ public class CommentController {
 			jsonObj.addProperty("message", "시스템에 문제가 발생하였습니다.");
 		}
 
+		// registerComment의 jsonObj :: {"result":true}
+		System.out.println("registerComment의 jsonObj :: " + jsonObj);
 		return jsonObj;
 	}
 
 	@GetMapping(value = "/comments/{boardIdx}")
 	public JsonObject getCommentList(@PathVariable("boardIdx") Long boardIdx, @ModelAttribute("params") CommentDTO params) {
+		
+		// getCommentList의 params :: Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]
+		System.out.println("getCommentList의 params :: " + params);
 
 		// 1. JSON 객체를 생성
 		JsonObject jsonObj = new JsonObject();
@@ -86,12 +85,18 @@ public class CommentController {
 		// 2. getCommentList 메소드를 호출한 결과, 즉 댓글 목록을 commentList에 저장
 		List<CommentDTO> commentList = commentService.getCommentList(params);
 		
+		// commentList 1 :: [Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]]
+		System.out.println("commentList 1 :: " + commentList);
+		
 		// 3. 등록된 댓글이 1개 이상이면, Gson 라이브러리에서 제공해주는 Gson 클래스의 메소드를 사용해서
 		//    commentList에 담긴 댓글을 JsonArray 타입으로 반환하고,
 		//    JSON 객체에 "commentList"라는 프로퍼티를 추가해서 리턴
 		if (CollectionUtils.isEmpty(commentList) == false) {
 			Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new GsonLocalDateTimeAdapter()).create();
 			JsonArray jsonArr = gson.toJsonTree(commentList).getAsJsonArray();
+			
+			// jsonArr :: [{"idx":45,"boardIdx":16378,"content":"안녕","writer":"관리자","deleteYn":"N","insertTime":"2021-11-12T13:32:36","currentPageNo":1,"recordsPerPage":10,"pageSize":10}]
+			System.out.println("jsonArr :: " + jsonArr);
 			
 			/*
 			 * { 
@@ -114,6 +119,9 @@ public class CommentController {
 			 * }
 			 */
 			jsonObj.add("commentList", jsonArr);
+			
+			// commentList :: [Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]]
+			System.out.println("commentList :: " + jsonObj);
 		}
 
 		return jsonObj;

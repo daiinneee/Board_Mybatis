@@ -53,6 +53,7 @@ public class CommentServiceImpl implements CommentService {
 			commentList = commentMapper.selectCommentList(params);
 		}
 
+		System.out.println("commentService의 commentList :: " + commentList);
 		return commentList;
 	}
 
