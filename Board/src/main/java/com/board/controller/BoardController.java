@@ -56,6 +56,10 @@ public class BoardController extends UiUtils {
 
 	@PostMapping(value = "/board/register.do")
 	public String registerBoard(final BoardDTO params, final MultipartFile[] files, Model model) {
+		
+		// BoardController params:: Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]
+		System.out.println("BoardController params:: " + params);
+		
 		Map<String, Object> pagingParams = getPagingParams(params);
 		try {
 			boolean isRegistered = boardService.registerBoard(params, files);
