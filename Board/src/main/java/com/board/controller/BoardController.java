@@ -48,7 +48,8 @@ public class BoardController extends UiUtils {
 			model.addAttribute("fileList", fileList);
 		}
 
-		System.out.println("controller params :: " + params.toString());
+		// Criteria [currentPageNo=1, recordsPerPage=10, pageSize=10, searchKeyword=null, searchType=null]
+		System.out.println("controller params :: " + params);
 		
 		return "board/write";
 	}
